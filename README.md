@@ -1,0 +1,1 @@
+## Playing around with [juniper](https://github.com/graphql-rust/juniper)
