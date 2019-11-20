@@ -1,9 +1,9 @@
-use std::io;
-use std::sync::Arc;
 use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer};
 use futures::future::Future;
 use juniper::http::graphiql::graphiql_source;
 use juniper::http::GraphQLRequest;
+use std::io;
+use std::sync::Arc;
 
 use crate::schema::{create_schema, Schema};
 
@@ -19,14 +19,19 @@ fn graphiql() -> HttpResponse {
         .body(html)
 }
 
-fn graphql(st: web::Data<Arc<Schema>>, data: web::Json<GraphQLRequest>) -> impl Future<Item = HttpResponse, Error = Error> {
+fn graphql(
+    st: web::Data<Arc<Schema>>,
+    data: web::Json<GraphQLRequest>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
         let res = data.execute(&st, &());
         Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
     })
     .map_err(Error::from)
     .and_then(|user| {
-        Ok(HttpResponse::Ok().content_type("application/json").body(user))
+        Ok(HttpResponse::Ok()
+            .content_type("application/json")
+            .body(user))
     })
 }
 
